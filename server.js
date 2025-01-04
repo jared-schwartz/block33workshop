@@ -26,6 +26,24 @@ app.get('/api/departments', async(req, res, next) => {
         console.error('Error fetching departments',err); 
     }
 })
+
+// Post Departments
+app.post('/api/departments', async (req, res, next) => {
+    try {
+        const { name } = req.body;
+        const postdepartments = await client.query(
+            `INSERT INTO departments(name)
+             VALUES ($1)
+             RETURNING *`,
+            [name] 
+        );
+        res.status(201).json(postdepartments.rows[0]); 
+    } catch (err) {
+        console.error('Error posting department', err);
+        res.status(500).json({ error: 'Failed to create department' }); 
+    }
+})
+
 // Post Employees
 app.post('/api/employees', async (req, res, next) => {
     try {
@@ -34,19 +52,19 @@ app.post('/api/employees', async (req, res, next) => {
             `INSERT INTO employees(name, department_id)
              VALUES ($1, $2)
              RETURNING *`,
-            [name, department_id] // Pass values here
+            [name, department_id] 
         );
-        res.status(201).json(postemployees.rows[0]); // Send the inserted row as response
+        res.status(201).json(postemployees.rows[0]); 
     } catch (err) {
         console.error('Error posting employees', err);
-        res.status(500).json({ error: 'Failed to create employee' }); // Send error response
+        res.status(500).json({ error: 'Failed to create employee' }); 
     }
 })
 //Delete Employees by ID
-app.delete('/api/employees/:id', async(req, res, next) =>{
+app.delete('/api/employees/:id', async (req, res, next) =>{
     try{
         const deleteemployee = await client.query(`
-            DELETE from employee where id=$1`,
+            DELETE from employees WHERE id=$1`,
         [req.params.id]);
         res.sendStatus(204);
     }catch(err){
